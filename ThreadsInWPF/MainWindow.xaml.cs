@@ -23,6 +23,7 @@ namespace ThreadsInWPF
     public partial class MainWindow : Window
     {
         private bool continueBlend = true;
+        private bool continueBlend2 = true;
         public MainWindow()
         {
             InitializeComponent();
@@ -50,12 +51,14 @@ namespace ThreadsInWPF
         {
             Thread t = new Thread(Blend1);
             t.Start();
+            btnStop1.Dispatcher.Invoke(() => btnStop1.IsEnabled = true);
         }
 
         private void BtnBlend2_Click(object sender, RoutedEventArgs e)
         {
             Thread t = new Thread(Blend2);
             t.Start();
+            btnStop2.Dispatcher.Invoke(() => btnStop2.IsEnabled = true);
         }
 
         private void BtnClean1_Click(object sender, RoutedEventArgs e)
@@ -85,15 +88,18 @@ namespace ThreadsInWPF
 
         private void Blend1()
         {
+            continueBlend = true;
             btnBlend1.Dispatcher.Invoke(() => btnBlend1.IsEnabled = false);
-            btnStop1.Dispatcher.Invoke(() => btnStop1.IsEnabled = true);
             int blendTime = 10;
-            for (int i = 0; i < blendTime; i++)
+            for (int i = 0; i < blendTime && continueBlend.Equals(true); i++)
             {
                 lblStatus1.Dispatcher.Invoke(() => lblStatus1.Content = $"Blending {i}");
-                Thread.Sleep(100);
+                Thread.Sleep(1000);
             }
-            lblStatus1.Dispatcher.Invoke(() => lblStatus1.Content = "Juice Ready");
+            if (continueBlend)
+            {
+                lblStatus1.Dispatcher.Invoke(() => lblStatus1.Content = "Juice Ready");
+            }
             btnBlend1.Dispatcher.Invoke(() => btnBlend1.IsEnabled = true);
             btnClean1.Dispatcher.Invoke(() => btnClean1.IsEnabled = true);
             btnStop1.Dispatcher.Invoke(() => btnStop1.IsEnabled = false);
@@ -101,15 +107,18 @@ namespace ThreadsInWPF
 
         private void Blend2()
         {
+            continueBlend2 = true;
             btnBlend2.Dispatcher.Invoke(() => btnBlend2.IsEnabled = false);
-            btnStop2.Dispatcher.Invoke(() => btnStop2.IsEnabled = true);
             int blendTime = 10;
-            for (int i = 0; i < blendTime; i++)
+            for (int i = 0; i < blendTime && continueBlend2.Equals(true); i++)
             {
                 lblStatus2.Dispatcher.Invoke(() => lblStatus2.Content = $"Blending {i}");
-                Thread.Sleep(100);
+                Thread.Sleep(1000);
             }
-            lblStatus2.Dispatcher.Invoke(() => lblStatus2.Content = "Juice Ready");
+            if (continueBlend2)
+            {
+                lblStatus2.Dispatcher.Invoke(() => lblStatus2.Content = "Juice Ready");
+            }
             btnBlend2.Dispatcher.Invoke(() => btnBlend2.IsEnabled = true);
             btnClean2.Dispatcher.Invoke(() => btnClean2.IsEnabled = true);
             btnStop2.Dispatcher.Invoke(() => btnStop2.IsEnabled = false);
@@ -127,13 +136,15 @@ namespace ThreadsInWPF
         }
         private void Stop1()
         {
-            btnStop1.Dispatcher.Invoke(() => Clean1(), DispatcherPriority.Send);
+            continueBlend = false;
             btnStop1.Dispatcher.Invoke(() => btnStop1.IsEnabled = false);
+            lblStatus1.Dispatcher.Invoke(() => lblStatus1.Content = "Stopped");
         }
         private void Stop2()
         {
-            btnStop2.Dispatcher.Invoke(() => Clean1(), DispatcherPriority.Send);
+            continueBlend2 = false;
             btnStop2.Dispatcher.Invoke(() => btnStop2.IsEnabled = false);
+            lblStatus2.Dispatcher.Invoke(() => lblStatus2.Content = "Stopped");
         }
     }
 
