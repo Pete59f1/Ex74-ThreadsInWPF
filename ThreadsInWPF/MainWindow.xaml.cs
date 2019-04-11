@@ -147,5 +147,4 @@ namespace ThreadsInWPF
             lblStatus2.Dispatcher.Invoke(() => lblStatus2.Content = "Stopped");
         }
     }
-
 }
