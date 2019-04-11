@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace ThreadsInWPF
 {
@@ -21,6 +22,7 @@ namespace ThreadsInWPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        private bool continueBlend = true;
         public MainWindow()
         {
             InitializeComponent();
@@ -46,36 +48,93 @@ namespace ThreadsInWPF
 
         private void BtnBlend1_Click(object sender, RoutedEventArgs e)
         {
-            Blend1();
+            Thread t = new Thread(Blend1);
+            t.Start();
         }
 
         private void BtnBlend2_Click(object sender, RoutedEventArgs e)
         {
-            Blend2();
+            Thread t = new Thread(Blend2);
+            t.Start();
         }
+
+        private void BtnClean1_Click(object sender, RoutedEventArgs e)
+        {
+            Thread t = new Thread(Clean1);
+            t.Start();
+        }
+
+        private void BtnClean2_Click(object sender, RoutedEventArgs e)
+        {
+            Thread t = new Thread(Clean2);
+            t.Start();
+        }
+
+        private void BtnStop1_Click(object sender, RoutedEventArgs e)
+        {
+            Thread t = new Thread(Stop1);
+            t.Start();
+        }
+
+        private void BtnStop2_Click(object sender, RoutedEventArgs e)
+        {
+            Thread t = new Thread(Stop2);
+            t.Start();
+        }
+
 
         private void Blend1()
         {
+            btnBlend1.Dispatcher.Invoke(() => btnBlend1.IsEnabled = false);
+            btnStop1.Dispatcher.Invoke(() => btnStop1.IsEnabled = true);
             int blendTime = 10;
             for (int i = 0; i < blendTime; i++)
             {
-                lblStatus1.Content = $"Blending {i}";
-                Thread.Sleep(1000);
+                lblStatus1.Dispatcher.Invoke(() => lblStatus1.Content = $"Blending {i}");
+                Thread.Sleep(100);
             }
-            lblStatus1.Content = "Juice Ready";
+            lblStatus1.Dispatcher.Invoke(() => lblStatus1.Content = "Juice Ready");
+            btnBlend1.Dispatcher.Invoke(() => btnBlend1.IsEnabled = true);
+            btnClean1.Dispatcher.Invoke(() => btnClean1.IsEnabled = true);
+            btnStop1.Dispatcher.Invoke(() => btnStop1.IsEnabled = false);
         }
 
         private void Blend2()
         {
+            btnBlend2.Dispatcher.Invoke(() => btnBlend2.IsEnabled = false);
+            btnStop2.Dispatcher.Invoke(() => btnStop2.IsEnabled = true);
             int blendTime = 10;
             for (int i = 0; i < blendTime; i++)
             {
-                lblStatus2.Content = $"Blending {i}";
-                Thread.Sleep(1000);
+                lblStatus2.Dispatcher.Invoke(() => lblStatus2.Content = $"Blending {i}");
+                Thread.Sleep(100);
             }
-            lblStatus2.Content = "Juice Ready";
+            lblStatus2.Dispatcher.Invoke(() => lblStatus2.Content = "Juice Ready");
+            btnBlend2.Dispatcher.Invoke(() => btnBlend2.IsEnabled = true);
+            btnClean2.Dispatcher.Invoke(() => btnClean2.IsEnabled = true);
+            btnStop2.Dispatcher.Invoke(() => btnStop2.IsEnabled = false);
         }
 
+        private void Clean1()
+        {
+            lblStatus1.Dispatcher.Invoke(() => lblStatus1.Content = "Cleaned");
+            btnClean1.Dispatcher.Invoke(() => btnClean1.IsEnabled = false);
+        }
+        private void Clean2()
+        {
+            lblStatus2.Dispatcher.Invoke(() => lblStatus2.Content = "Cleaned");
+            btnClean2.Dispatcher.Invoke(() => btnClean2.IsEnabled = false);
+        }
+        private void Stop1()
+        {
+            btnStop1.Dispatcher.Invoke(() => Clean1(), DispatcherPriority.Send);
+            btnStop1.Dispatcher.Invoke(() => btnStop1.IsEnabled = false);
+        }
+        private void Stop2()
+        {
+            btnStop2.Dispatcher.Invoke(() => Clean1(), DispatcherPriority.Send);
+            btnStop2.Dispatcher.Invoke(() => btnStop2.IsEnabled = false);
+        }
     }
 
 }
